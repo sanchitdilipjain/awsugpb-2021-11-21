@@ -49,5 +49,13 @@
         ]
       }
     }
-  }
+  },
+    "Outputs": {
+        "RoleName": {
+            "Description": "IAM role",
+            "Value": {
+                "Ref": "LambdaExecutionRole"
+            }
+    }
+}
 }
