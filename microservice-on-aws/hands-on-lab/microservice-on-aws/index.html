@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <title>New Subscription</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="style.css">
+    <script src="http://fb.me/react-0.11.1.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.11.1.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+
+        <img src="logo-navigation.png" />
+      </div>
+      <div id="companyApp"></div>  
+    </div>
+
+    
+    <script type="text/jsx">
+      /** @jsx React.DOM */
+      var CompanyApp = React.createClass({
+        getInitialState: function() {
+          return {companylist:this.props.companies || [],
+          addClient:false
+          };
+        },
+
+        handleNewRowSubmit: function( newcompany ) {
+          this.setState( {companylist: this.state.companylist.concat([newcompany])} );
+        },
+
+        showAddClient: function (){
+          this.setState({
+            showListClient : false,
+            addClient:true
+          })
+        },
+        render: function() {
+          console.log('STATE CONSOLE LOG', this.state)
+          var tableStyle = {width: '100%'};
+          var leftTdStyle = {width: '70%',padding:'10px',verticalAlign: 'top'};
+          var rightTdStyle = {width: '70%',padding:'10px',verticalAlign: 'top'};
+          return ( 
+            <div>
+              <ul className="nav nav-tabs">
+                <li className={!this.state.showListClient ? "active" : ""}><a onClick={this.showAddClient} href="#">Add Subscription</a></li>
+              </ul>
+            {this.state.showListClient == true && this.state.companylist.length >0?
+                <table style={tableStyle}>
+                  <tr>
+                    <td style={leftTdStyle}>
+                      <CompanyList clist={this.state.companylist} />
+                    </td>
+                  </tr>
+              </table>
+              :null}
+              
+              {this.state.addClient == true ?<NewRow onRowSubmit={this.handleNewRowSubmit}/> : null}
+           
+          
+        </div>
+          );
+        }
+      });
+      
+      
+      var NewRow = React.createClass({
+        handleSubmit: function() {
+          var name = this.refs.name.getDOMNode().value;
+          var location = this.refs.location.getDOMNode().value;
+          var email_id = this.refs.email_id.getDOMNode().value;
+          var company_name = this.refs.company_name.getDOMNode().value;
+
+          var newrow = `{
+             "name": "${name}", 
+             "location": "${location}",
+             "email_id": "${email_id}",
+             "company_name": "${company_name}"
+           }`
+
+          console.log(newrow)
+          const http = new XMLHttpRequest()
+
+          /** replace api-endpoint-placeholder with actual endpoint*/
+
+          http.open("POST", "api-endpoint-placeholder", true);
+          http.setRequestHeader('Content-Type', 'application/json');
+          http.send(newrow);
+          http.onload = () => {
+            var test = JSON.parse(http.responseText)
+            if(test.statusCode == '200'){
+              this.props.onRowSubmit( JSON.parse(newrow).clientDetails );
+            }
+          }
+            
+          this.refs.name.getDOMNode().value = '';
+          this.refs.location.getDOMNode().value = '';
+          this.refs.email_id.getDOMNode().value = '';
+          this.refs.company_name.getDOMNode().value = '';
+          return false;
+        },
+        render: function() {
+          var inputStyle = {padding:'12px'}
+          return ( 
+            <div className="well">
+              <h3>Add A Subscription</h3>
+            <form onSubmit={this.handleSubmit}>
+
+              <div className="form-group">
+                <label>Name:</label>
+                <input type="text" className="form-control" ref="name" />
+              </div>
+              <div className="form-group">
+                <label>Location:</label>
+                <input type="text" className="form-control" ref="location" />
+              </div>
+              <div className="form-group">
+                  <label>Email-Id:</label>
+                  <input type="text" className="form-control" ref="email_id" />
+              </div>
+              <div className="form-group">
+                <label>Company Name:</label>
+                <input type="text" className="form-control" ref="company_name" />
+              </div>
+              <div className="input-group input-group-lg add-client-btn" >
+                <input type="submit"  className="btn btn-primary" value="Add"/>
+              </div>  
+            </form>
+            </div>
+            );
+        }
+      });
+      var defCompanies = [];
+      React.renderComponent( <CompanyApp companies={defCompanies}/>, document.getElementById( "companyApp" ) );
+    </script>
+  </body>
+  </html>
